@@ -1,0 +1,27 @@
+/* README
+ *
+ * Copyright 2009-2012 Nixotic Design
+ *
+ * This file is part of AVR-LibNixotic.
+ *
+ * AVR-LibNixotic is free software: you can redistribute it and/or modify
+ * it under the terms of the Lesser GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * AVR-LibNixotic is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * Lesser GNU General Public License for more details.
+ *
+ * You should have received a copy of the Lesser GNU General Public License
+ * along with AVR-LibNixotic.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+This library is primarily intended to work with the ATiny2313 and similar
+range of Atmel microcontrolers. I have not yet set up the library to explicitly
+state which devices are supported but will aim to provide more information
+in future. In the mean time feel free to hack away and make use if this if
+you can :)
+
+Geoff
