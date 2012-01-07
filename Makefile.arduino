@@ -34,6 +34,8 @@
  
 # PROJECTNAME and NAME can be the same
 # MAIN should point to whichever file has 'int main(void) {...' in it.
+#
+# Note: this Makefile requires you to include the boards.txt file in the build/ directory
 
 ## General Flags
 PROJECT = <PROJECT>

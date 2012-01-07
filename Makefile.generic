@@ -112,7 +112,7 @@ size: ${TARGET}
 
 # rule for uploading firmware:
 program: $(TARGET).hex
-	$(AVRDUDE) -U flash:w:main.hex:i
+	$(AVRDUDE) -U flash:w:$(TARGET).hex:i
 
 
 ## Clean target
