@@ -45,6 +45,9 @@ MAIN = main
 CC = avr-gcc
 
 
+#$(shell if [ ! -f version ]; then echo 0 > version; fi ;)
+#VER := $(shell echo `cat version`+1| bc)
+
 ### AVRDUDE STUFF BELOW ###
 
 ARDUINO_VERSION = pro328

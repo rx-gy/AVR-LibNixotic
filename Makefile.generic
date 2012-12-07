@@ -44,6 +44,9 @@ TARGET = ../bin/$(NAME).elf
 MAIN = main
 CC = avr-gcc
 
+#$(shell if [ ! -f version ]; then echo 0 > version; fi ;)
+#VER := $(shell echo `cat version`+1| bc)
+
 AVRDUDE = avrdude -c avrispv2 -P usb -p $(MCU) # edit this line for your programmer
 
 ## Options common to compile, link and assembly rules
