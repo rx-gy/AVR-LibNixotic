@@ -1,0 +1,382 @@
+#!/bin/bash
+#
+# build-env
+#
+# Copyright 2009-2012 Nixotic Design
+#
+# This file is part of AVR-LibNixotic.
+#
+# AVR-LibNixotic is free software: you can redistribute it and/or modify
+# it under the terms of the Lesser GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# AVR-LibNixotic is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# Lesser GNU General Public License for more details.
+#
+# You should have received a copy of the Lesser GNU General Public License
+# along with AVR-LibNixotic.  If not, see <http://www.gnu.org/licenses/>.
+
+# AVR-GCC Toolchain build install helper script
+# Geoff Swan ( geoff at nixotic dot com )
+# see nixotic.com for more details
+
+# Program versions
+#binuV='2.23' #currently being built with a snapshot. possibly daily.
+libcV='1.8.0'
+gccV='4.7.2'
+gdbV='7.5.1'
+dudeV='5.11.1'
+
+# Program names
+#binutils=binutils-$binuV
+binutils=binutils
+binutils_arch=$binutils.tar.bz2
+
+avrlibc=avr-libc-$libcV
+avrlibc_arch=$avrlibc.tar.bz2
+
+gcc=gcc-$gccV
+gcc_arch=$gcc.tar.bz2
+
+gdb=gdb-$gdbV
+gdb_arch=$gdb.tar.bz2
+
+avrdude=avrdude-$dudeV
+avrdude_arch=$avrdude.tar.gz
+
+# Program download locations - customise for prefered mirrors
+#dl_binutils="http://ftp.gnu.org/gnu/binutils/$binutils_arch"
+#dl_binutils="http://mirror.internode.on.net/pub/gnu/gnu/binutils/$binutils_arch"
+dl_binutils="http://sourceware.mirrors.tds.net/pub/sourceware.org/binutils/snapshots/binutils.tar.bz2"
+dl_avrlibc="http://download.savannah.gnu.org/releases/avr-libc/$avrlibc_arch"
+dl_gcc="http://mirror.internode.on.net/pub/gnu/gcc/$gcc/$gcc_arch"
+dl_gdb="http://mirror.internode.on.net/pub/gnu/gdb/$gdb_arch"
+dl_avrdude="http://download.savannah.gnu.org/releases/avrdude/$avrdude_arch"
+
+dir=$(pwd)
+ROOT_UID=0    # Only users with $UID 0 have root privileges
+E_NOTROOT=87  # Non-root exit error
+INSTALL="/usr/local/avr"
+COMPLETED=""
+
+prerequisites='build-essential libgmp3-dev libmpc-dev libmpfr-dev ncurses-dev libusb-dev bison texinfo flex'
+
+setup()
+{
+   if [ "$UID" -ne "$ROOT_UID" ]
+   then
+      echo "Must be root to run this script"
+      exit $E_NOTROOT
+   fi
+   export PATH="$INSTALL/bin:$PATH"
+}
+
+download()
+{
+	# binutils
+	if [ -f $binutils_arch ]
+	then
+		echo "$binutils_arch has already been downloaded"
+	else
+		wget $dl_binutils
+	fi
+	# avr-libc
+	if [ -f $avrlibc_arch ]
+	then
+		echo "$avrlibc_arch has already been downloaded"
+	else
+		wget $dl_avrlibc
+	fi
+	# gcc
+	if [ -f $gcc_arch ]
+	then
+		echo "$gcc_arch has already been downloaded"
+	else
+		wget $dl_gcc
+	fi
+
+
+	# gdb
+	if [ -f $gdb_arch ]
+	then
+		echo "$gdb_arch has already been downloaded"
+	else
+		wget $dl_gdb
+	fi
+	# avrdude
+	if [ -f $avrdude_arch ]
+	then
+		echo "$avrdude_arch has already been downloaded"
+	else
+		wget $dl_avrdude
+	fi
+}
+install_prerequisites()
+{
+	apt-get install $prerequisites
+}
+install_binutils()
+{
+   echo -en "\033]0;$COMPLETED:Un-tarring binutils\007"
+   mkdir -p binutils      
+   if [ $? -eq 0 ]
+   then
+      tar -xj --no-same-owner -C binutils -f $binutils_arch
+		binutils_version=$(ls $binutils/ | xargs)
+   else
+      return 1
+   fi
+
+   if [ $? -eq 0 ]
+   then
+		cd $binutils
+      echo -en "\033]0;$COMPLETED:Config binutils\007"
+      $binutils_version/configure --prefix=$INSTALL --target=avr
+   else
+      return 2
+   fi
+   if [ $? -eq 0 ]
+   then
+      echo -en "\033]0;$COMPLETED:Making binutils\007"
+      make -j 5
+   else
+      return 3
+   fi
+   if [ $? -eq 0 ]
+   then
+      cd $dir/binutils
+      echo -en "\033]0;$COMPLETED:Installing binutils\007"
+      make install
+   else
+      return 4
+   fi
+   if [ $? -eq 0 ]
+   then
+      return 0
+   else
+      return 5
+   fi
+}
+
+install_gcc()
+{
+   echo -en "\033]0;$COMPLETED:Un-tarring gcc\007"
+   cd $dir
+   mkdir -p gcc
+   if [ $? -eq 0 ]
+   then
+      tar -xj --no-same-owner -C gcc -f $gcc_arch
+	echo "already untarred gcc"
+   else
+      return 1
+   fi
+
+	cd gcc
+#	patch -p0 < ../gcc-bugfix-45261.patch
+
+   if [ $? -eq 0 ]
+   then 
+      echo -en "\033]0;$COMPLETED:Configuring gcc\007"
+      $gcc/configure --prefix=$INSTALL \
+                     --target=avr \
+                     --enable-languages="c,c++" \
+                     --disable-nls
+   else
+      return 2
+   fi
+   if [ $? -eq 0 ]
+   then 
+      echo -en "\033]0;$COMPLETED:Making gcc\007"
+      make -j 5
+   else
+      return 3
+   fi
+   if [ $? -eq 0 ]
+   then 
+      cd $dir/gcc
+      echo -en "\033]0;$COMPLETED:Installing $gcc\007"
+      make install
+   else
+      return 4
+   fi
+   if [ $? -eq 0 ]
+   then 
+      return 0
+   else
+      return 5
+   fi
+}
+
+install_avrlibc()
+{
+   echo -en "\033]0;$COMPLETED:Un-tarring $avrlibc\007"
+   cd $dir
+   mkdir -p avrlibc
+   if [ $? -eq 0 ]
+   then
+      tar -xj --no-same-owner -C avrlibc -f $avrlibc_arch
+   else
+      return 1
+   fi
+   if [ $? -eq 0 ]
+   then
+      cd avrlibc
+      echo -en "\033]0;$COMPLETED:Configuring $avrlibc\007"
+      unset CC
+      $avrlibc/configure --build=`./config.guess` \
+                         --host=avr \
+                         --prefix=$INSTALL
+   else
+      return 2
+   fi
+   if [ $? -eq 0 ]
+   then
+      echo -en "\033]0;$COMPLETED:Making $avrlibc\007"
+      make -j 5
+   else
+      return 3
+   fi
+   if [ $? -eq 0 ]
+   then
+      cd $dir/avrlibc
+      echo -en "\033]0;$COMPLETED:Installing $avrlibc\007"
+      make install
+   else
+      return 4
+   fi
+   if [ $? -eq 0 ]
+   then
+      return 0
+   else
+      return 5
+   fi
+}
+
+install_gdb()
+{   
+   echo -en "\033]0;$COMPLETED:Un-tarring $gdb\007"
+   cd $dir
+   mkdir -p gdb
+   if [ $? -eq 0 ]
+   then
+      tar -xj --no-same-owner -C gdb -f $gdb_arch
+   else
+      return 1
+   fi
+   if [ $? -eq 0 ]
+   then
+      cd gdb
+      echo -en "\033]0;$COMPLETED:Configuring $gdb\007"
+      $gdb/configure --target=avr \
+                     --prefix=$INSTALL
+   else
+      return 2
+   fi
+   if [ $? -eq 0 ]
+   then
+      echo -en "\033]0;$COMPLETED:Making $gdb\007"
+      make -j 5
+   else
+      return 3
+   fi
+   if [ $? -eq 0 ]
+   then
+      cd $dir/gdb 
+      echo -en "\033]0;$COMPLETED:Installing $gdb\007"    
+      make install    
+   else
+      return 4
+   fi
+   if [ $? -eq 0 ]
+   then
+      return 0
+   else
+      return 5
+   fi
+}
+
+install_avrdude()
+{ 
+   # AVRDUDE
+
+   echo -en "\033]0;$COMPLETED:Un-tarring $avrdude\007"
+   cd $dir
+   mkdir -p avrdude
+   if [ $? -eq 0 ]
+   then 
+      tar -xz --no-same-owner -C avrdude -f $avrdude_arch
+   else
+      return 1
+   fi
+   if [ $? -eq 0 ]
+   then 
+      cd avrdude
+      echo -en "\033]0;$COMPLETED:Configuring $avrdude\007"
+      $avrdude/configure --prefix=$INSTALL
+   else
+      return 2
+   fi
+   if [ $? -eq 0 ]
+   then 
+      echo -en "\033]0;$COMPLETED:Making $avrdude\007"
+      make -j 5
+   else
+      return 3
+   fi
+   if [ $? -eq 0 ]
+   then 
+      cd $dir/avrdude
+      echo -en "\033]0;$COMPLETED:Installing $avrdude\007"
+      make install
+   else
+      return 4
+   fi
+   if [ $? -eq 0 ]
+   then
+      return 0
+   else
+      return 5
+   fi
+}
+set_path()
+{
+	rm -f /etc/profile.d/avr-tools.sh
+	echo "export PATH=\$PATH:$INSTALL/bin" > /etc/profile.d/avr-tools.sh
+}
+#install_doc()
+#{
+#}
+
+install_prerequisites
+download
+setup
+
+install_binutils
+BIN_NO=$?
+if [ $BIN_NO -eq 0 ] ; then COMPLETED+="I" ; else COMPLETED+="X" ; fi  
+install_gcc
+GCC_NO=$?
+if [ $GCC_NO -eq 0 ] ; then COMPLETED+="I" ; else COMPLETED+="X" ; fi  
+install_avrlibc
+LBC_NO=$?
+if [ $LBC_NO -eq 0 ] ; then COMPLETED+="I" ; else COMPLETED+="X"; exit ; fi  
+install_gdb
+GDB_NO=$?
+if [ $GDB_NO -eq 0 ] ; then COMPLETED+="I" ; else COMPLETED+="X" ; fi  
+install_avrdude
+DUD_NO=$?
+#
+## currently just uses the Ubuntu /etc/profile.d/ script execution to set the path
+set_path
+#
+echo "0 - Success. 1 - mkdir failed. 2 - Un-tar failed. 3 - configure failed. 4 - make failed. 5 - install failed."
+echo "---"
+echo "binutils: $BIN_NO"
+echo "gcc: $GCC_NO"
+echo "libc: $LBC_NO"
+echo "gdb: $GDB_NO"
+echo "avrdude: $DUD_NO"
+
