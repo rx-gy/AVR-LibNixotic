@@ -26,7 +26,7 @@
 # Program versions
 #binuV='2.23' #currently being built with a snapshot. possibly daily.
 libcV='1.8.0'
-gccV='4.7.2'
+gccV='4.8.2'
 gdbV='7.5.1'
 dudeV='5.11.1'
 
