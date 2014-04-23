@@ -76,7 +76,7 @@ void UART_StartTransmission ( void ) ;
 #define BAUD_1M       0 //ERROR 0.0%
 #endif
 
-#if defined (__AVR_ATmega328P__) || (__AVR_ATmega328__)
+#if defined (__AVR_ATmega328P__) || (__AVR_ATmega328__) 
  #define UDR UDR0
  #define U2X U2X0
  #define UCSRA UCSR0A
@@ -95,5 +95,27 @@ void UART_StartTransmission ( void ) ;
  #define UCSZ0 UCSZ00
  #define USBS USBS0
  #define USART_RXC_vect USART_RX_vect
+#endif
+
+#if defined (__AVR_ATmega32U4__)
+ #define UDR UDR1
+ #define U2X U2X1
+ #define UCSRA UCSR1A
+ #define UCSRB UCSR1B
+ #define UCSRC UCSR1C
+ #define UBRRL UBRR1L
+ #define UBRRH UBRR1H
+ #define TXC TXC1
+ #define RXEN RXEN1
+ #define TXEN TXEN1
+ #define UDRIE UDRIE1
+ #define TXCIE TXCIE1
+ #define RXCIE RXCIE1
+ #define UCSZ2 UCSZ02
+ #define UCSZ1 UCSZ11
+ #define UCSZ0 UCSZ10
+ #define USBS USBS0
+ #define USART_RXC_vect USART1_RX_vect
+ #define USART_UDRE_vect USART1_UDRE_vect
 #endif
 #endif

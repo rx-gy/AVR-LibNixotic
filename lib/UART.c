@@ -39,7 +39,7 @@ void InitUART (uint16_t baudrate)
 	/* Enable UART receiver and transmitter, and receive interrupt */
 	UCSRA = 0; /* WARNING: without this Arduino Pro Mini defaults to U2X = 1!! */
 	UCSRB = ((1 << RXCIE) | (1 << RXEN) | (1 << TXEN)) ;
-#if defined (__AVR_ATmega328P__) || (__AVR_ATmega328__)
+#if defined (__AVR_ATmega328P__) || (__AVR_ATmega328__) || (__AVR_ATmega32U4__)
 	UCSRC = ((1 << UCSZ0) | (1 << UCSZ1)); /* 8N1 */
 #else
 	UCSRC = ((1 << UCSZ0) | (1 << UCSZ1) | (1 << URSEL)) ; /* 8N1 */
