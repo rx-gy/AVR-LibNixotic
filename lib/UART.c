@@ -26,7 +26,7 @@ uint8_t __attribute__ ((aligned(UART_TX_BUFFER_SIZE))) UART_TxBuf[UART_TX_BUFFER
 volatile uint8_t UART_TxHead ;
 volatile uint8_t UART_TxTail ;
 volatile uint8_t rtx_stat ;
-#define MASK8BIT 255
+
 
 /* Initialize UART */
 void InitUART (uint16_t baudrate)
@@ -34,15 +34,18 @@ void InitUART (uint16_t baudrate)
 
 	uint8_t x ;
 
-//	UBRRH = (uint8_t) (baudrate >> 8) ;
-	UBRRH = 0;
+	UBRRH = (uint8_t) ((baudrate >> 8) & MASK4BIT) ;
 	UBRRL = (uint8_t) (baudrate & MASK8BIT) ; 	/* Set the baud rate */
 	/* Enable UART receiver and transmitter, and receive interrupt */
-//	UCSRA = (1 << U2X) /* Double the transmission speed */;
 	UCSRA = 0; /* WARNING: without this Arduino Pro Mini defaults to U2X = 1!! */
 	UCSRB = ((1 << RXCIE) | (1 << RXEN) | (1 << TXEN)) ;
-//	UCSRC = ((1 << USBS) | (1 << UCSZ0) | (1 << UCSZ1)) | (1 << URSEL) ; /* 8N2 */
+#if defined (__AVR_ATmega328P__) || (__AVR_ATmega328__)
+	UCSRC = ((1 << UCSZ0) | (1 << UCSZ1)); /* 8N1 */
+#else
 	UCSRC = ((1 << UCSZ0) | (1 << UCSZ1) | (1 << URSEL)) ; /* 8N1 */
+#endif
+	/* UCSRA = (1 << U2X); */ /* Double the transmission speed */
+	/* UCSRC = ((1 << USBS) | (1 << UCSZ0) | (1 << UCSZ1)) | (1 << URSEL) ; */ /* 8N2 */
 
 	x = 0 ; 			    /* Flush receive buffer */
 	rtx_stat = 0 ;
@@ -54,7 +57,7 @@ void InitUART (uint16_t baudrate)
 
 void SetBaud (uint16_t baudrate)
 {
-	UBRRH = (uint8_t) (baudrate >> 8) ;
+	UBRRH = (uint8_t) ((baudrate >> 8) & MASK4BIT) ;
 	UBRRL = (uint8_t) (baudrate & MASK8BIT) ; 	/* Set the baud rate */
 }
 
@@ -140,8 +143,8 @@ uint8_t UART_ReceiveByte (void)
 {
 	uint8_t tmptail ;
 
-	while (UART_RxHead == UART_RxTail)  /* Wait for incoming data */
-		;
+	while(UART_RxHead == UART_RxTail)  /* Wait for incoming data */
+	  ;
 	tmptail = (UART_RxTail + 1) & UART_RX_BUFFER_MASK ;/* Calculate buffer index */
 
 	UART_RxTail = tmptail ;                /* Store new index */

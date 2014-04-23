@@ -25,7 +25,7 @@
 
 /* UART Buffer Defines */
 #define UART_RX_BUFFER_SIZE 8     /* 2,4,8,16,32,64,128 or 256 bytes */
-#define UART_TX_BUFFER_SIZE 8
+#define UART_TX_BUFFER_SIZE 32
 
 #define ERROR_UART_TX_FULL 0x01
 
@@ -51,32 +51,49 @@ uint8_t UART_QueueTXBuffer ( uint8_t *buffer, uint8_t len );
 void UART_StartTransmission ( void ) ;
 
 
+#define MASK8BIT 0xFF
+#define MASK4BIT 0x0F
+
 /* BAUD_RATES */
+#if F_CPU == 8000000
 /* 8 MHz */
-#define BAUD_8M_48 	103	//ERROR 0.2%
-#define BAUD_8M_96 	51		//ERROR 0.2%
-#define BAUD_8M_144 	34 	//ERROR -0.8%
-#define BAUD_8M_192	25		//ERROR 0.2%
-#define BAUD_8M_384	12		//ERROR 0.2%
-#define BAUD_8M_250K	1		//ERROR 0.0%
-#define BAUD_8M_500K 0		//ERROR 0.0%
+#define BAUD_4800   103 //ERROR 0.2%
+#define BAUD_9600    51 //ERROR 0.2%
+#define BAUD_14400   34 //ERROR -0.8%
+#define BAUD_19200   25 //ERROR 0.2%
+#define BAUD_38400   12 //ERROR 0.2%
+#define BAUD_250K     1 //ERROR 0.0%
+#define BAUD_500K     0 //ERROR 0.0%
+#elif F_CPU == 16000000
+/* 16 MHz */
+#define BAUD_4800   207 //ERROR 0.2%
+#define BAUD_9600   103 //ERROR 0.2%
+#define BAUD_14400   68 //ERROR 0.6%
+#define BAUD_19200   51 //ERROR 0.2%
+#define BAUD_38400   25 //ERROR 0.2%
+#define BAUD_250K     3 //ERROR 0.0%
+#define BAUD_500K     1 //ERROR 0.0%
+#define BAUD_1M       0 //ERROR 0.0%
+#endif
+
 #if defined (__AVR_ATmega328P__) || (__AVR_ATmega328__)
-	#define UDR UDR0
-	#define U2X U2X0
-	#define UCSRA UCSR0A
-	#define UCSRB UCSR0B
-	#define UCSRC UCSR0C
-	#define UBRRL UBRR0L
-	#define UBRRH UBRR0H
-	#define TXC TXC0
-	#define RXEN RXEN0
-	#define TXEN TXEN0
-	#define UDRIE UDRIE0
-	#define TXCIE TXCIE0
-	#define RXCIE RXCIE0
-	#define UCSZ2 UCSZ02
-	#define UCSZ1 UCSZ01
-	#define UCSZ0 UCSZ00
-	#define USBS USBS0
+ #define UDR UDR0
+ #define U2X U2X0
+ #define UCSRA UCSR0A
+ #define UCSRB UCSR0B
+ #define UCSRC UCSR0C
+ #define UBRRL UBRR0L
+ #define UBRRH UBRR0H
+ #define TXC TXC0
+ #define RXEN RXEN0
+ #define TXEN TXEN0
+ #define UDRIE UDRIE0
+ #define TXCIE TXCIE0
+ #define RXCIE RXCIE0
+ #define UCSZ2 UCSZ02
+ #define UCSZ1 UCSZ01
+ #define UCSZ0 UCSZ00
+ #define USBS USBS0
+ #define USART_RXC_vect USART_RX_vect
 #endif
 #endif
