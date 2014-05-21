@@ -1,6 +1,6 @@
-/* TIMER.h
+/* ADC.h
  *
- * Copyright 2009-2012 Nixotic Design
+ * Copyright 2009-2013 Nixotic Design
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the Lesser GNU General Public License as published by
@@ -19,19 +19,29 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
+#define ADCREF_AREF 0
+#define ADCREF_AVCC _BV(REFS0)
+#define ADCREF_INT (_BV(REFS1) | _BV(REFS0))
 
-void timer0_basic( uint8_t, uint8_t );
-void timer1_basic( void );
-void timer1_tic( void );
+#define ADCTRG_FREE 0
+#define ADCTRG_ANLG _BV(ADTS0)
+#define ADCTRG_EIR0 _BV(ADTS1)
+#define ADCTRG_T0MA (_BV(ADTS1) | _BV(ADTS0))
+#define ADCTRG_T0VF _BV(ADTS2)
+#define ADCTRG_T1MB (_BV(ADTS2) | _BV(ADTS0))
+#define ADCTRG_T1VF (_BV(ADTS2) | _BV(ADTS1))
+#define ADCTRG_T1CA (_BV(ADTS2) | _BV(ADTS1) | _BV(ADTS0))
 
-extern volatile uint8_t timer0_triggered;
-extern volatile uint8_t timer1_triggered;
-extern volatile uint8_t timer0_alpha;
-extern volatile uint16_t counter0;
+#define ADC_CH0 0
+#define ADC_CH1 1
+#define ADC_CH2 2
+#define ADC_CH3 3
+#define ADC_CH4 4
+#define ADC_CH5 5
+#define ADC_CH6 6
+#define ADC_CH7 7
 
-#define TIMER_OFF (uint8_t) 0
-#define TIMER_PRE_1 (uint8_t) _BV(CS00)
-#define TIMER_PRE_8 (uint8_t) _BV(CS01)
-#define TIMER_PRE_64 (uint8_t) (_BV(CS01)|_BV(CS00))
-#define TIMER_PRE_256 (uint8_t) _BV(CS02)
-#define TIMER_PRE_1024 (uint8_t) (_BV(CS02)|_BV(CS00))
+void setup_adc(uint8_t, uint8_t, uint8_t, uint8_t);
+
+extern volatile uint8_t adc_ready;
+extern volatile uint16_t adc_val;
